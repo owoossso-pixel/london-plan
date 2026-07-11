@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>런던 계획</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:#f7f7f5;color:#1f2430}
+header{padding:12px 16px;background:#fff;border-bottom:1px solid #e6e6e2;position:sticky;top:0;z-index:1000}
+header h1{margin:0;font-size:18px}header .sub{font-size:11.5px;color:#6b7280;margin-top:2px;line-height:1.4}
+.tabs{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.tab{border:1px solid #e6e6e2;background:#fff;padding:8px 14px;border-radius:999px;font-size:13px;cursor:pointer;color:#6b7280;-webkit-user-select:none;user-select:none}
+.tab.on.sat{background:#2563eb;border-color:#2563eb;color:#fff}
+.tab.on.sun{background:#e11d48;border-color:#e11d48;color:#fff}
+.tab.on.all{background:#1f2430;border-color:#1f2430;color:#fff}
+.layout{display:grid;grid-template-columns:360px 1fr;height:calc(100vh - 92px)}
+#sb{overflow-y:auto;-webkit-overflow-scrolling:touch;border-right:1px solid #e6e6e2;background:#fff;padding:6px 0 24px}
+#map{height:100%;width:100%;min-height:280px}
+@media(max-width:820px){
+  .layout{display:block;height:auto}
+  #map{height:46vh;min-height:260px;position:sticky;top:92px;z-index:5}
+  #sb{max-height:none;border-right:none;border-top:1px solid #e6e6e2}
+  header h1{font-size:17px}
+  .tab{padding:9px 13px;font-size:12.5px}
+}
+.db{display:none}.db.show{display:block}
+.dt{font-size:11px;font-weight:700;color:#6b7280;padding:12px 14px 5px;text-transform:uppercase}
+.st{display:flex;gap:10px;padding:11px 14px;cursor:pointer;border-bottom:1px solid #eee;min-height:44px}
+.st:active{background:#f3f3f1}
+.bd{flex:0 0 auto;width:24px;height:24px;border-radius:50%;color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.bd.sq{border-radius:5px;font-size:10px}
+.st b{font-size:14px;display:block;margin:0 0 1px}
+.st .tm{font-size:11.5px;color:#6b7280;font-weight:700}
+.st .nt{font-size:12px;color:#6b7280;line-height:1.45}
+.st a{display:inline-block;margin-top:6px;font-size:12px;color:#2563eb;text-decoration:none;font-weight:600;padding:2px 0}
+.cb{margin:9px 14px 14px;border:1.5px dashed #e6e6e2;border-radius:10px;padding:9px 11px 3px;background:#fcfcfb}
+.cb .ct{font-size:12.5px;font-weight:700}.cb .ch{font-size:11px;color:#6b7280;margin-bottom:6px;line-height:1.4}
+.cb .st{padding:8px 0}
+.ni{width:25px;height:25px;border-radius:50% 50% 50% 0;transform:rotate(45deg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid #fff}
+.ni span{transform:rotate(-45deg)}
+.qi{width:21px;height:21px;border-radius:5px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;border:2px solid #fff}
+.leaflet-popup-content{font-size:13px}
+</style></head><body>
+<header><h1>런던 계획</h1><div class="sub">토요일: 버스(Finchley Rd 11:55 도착)→St Pancras 기차(19:02) · 일요일: 학교 단체(하차 미정, 시나리오 3개)</div>
+<div class="tabs">
+<div class="tab on all" data-d="all" onclick="setDay('all')">전체</div>
+<div class="tab" data-d="sat" onclick="setDay('sat')">토요일 · 우리끼리</div>
+<div class="tab" data-d="sun" onclick="setDay('sun')">일요일 · 학교단체</div>
+</div></header>
+<div class="layout">
+<div id="sb">
+<div class="db show" data-d="sat">
+  <div class="dt" style="color:#2563eb">토요일 · 핵심 동선 (Finchley Rd → St Pancras)</div>
+  <div id="l-sc"></div><div id="l-sa"></div><div id="l-sb"></div><div id="l-sd"></div>
+</div>
+<div class="db show" data-d="sun">
+  <div class="dt" style="color:#e11d48">일요일 · 핵심 관광 (순서는 하차 지점따라 유동적)</div>
+  <div id="l-nc"></div><div id="l-na"></div><div id="l-nb"></div>
+</div>
+</div>
+<div id="map"></div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="london_data.js"></script>
+<script src="london_app.js"></script>
+</body></html>
