@@ -103,12 +103,20 @@ function setDay(day){
 }
 setDay('all');
 
-/* ---- 모바일: 지도가 메인, 상단바 탭하면 현재 동선이 팝업(바텀시트)으로 ---- */
+/* ---- 모바일: 지도가 메인, '동선 목록 보기' 버튼을 누르면 현재 동선이 글래스 팝업 카드로 ---- */
 function initMobileRoutePopup(){
   if(!window.matchMedia('(max-width:820px)').matches) return;
   var header=document.querySelector('header');
   var routeBackdrop=document.getElementById('routeBackdrop');
-  if(!header||!routeBackdrop) return;
+  var sb=document.getElementById('sb');
+  if(!header||!routeBackdrop||!sb) return;
+
+  var handle=document.createElement('div'); handle.className='sb-handle';
+  handle.innerHTML='<span>📋 현재 동선 목록</span>';
+  var closeBtn=document.createElement('button'); closeBtn.type='button'; closeBtn.setAttribute('aria-label','닫기'); closeBtn.textContent='✕';
+  handle.appendChild(closeBtn);
+  sb.insertBefore(handle, sb.firstChild);
+
   function setOpen(open){
     document.body.classList.toggle('route-open', open);
     if(!open) setTimeout(function(){map.invalidateSize();},220);
@@ -117,6 +125,7 @@ function initMobileRoutePopup(){
     if(e.target.closest('.tab')) return;
     setOpen(!document.body.classList.contains('route-open'));
   });
+  closeBtn.addEventListener('click', function(e){ e.stopPropagation(); setOpen(false); });
   routeBackdrop.addEventListener('click', function(){ setOpen(false); });
   setTimeout(function(){map.invalidateSize();},50);
 }
