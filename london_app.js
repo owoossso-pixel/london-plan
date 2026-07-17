@@ -19,6 +19,8 @@ function addArrows(pts,color,layer){
 var map=L.map('map',{zoomControl:true}).setView([51.52,-0.16],11);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'OpenStreetMap'}).addTo(map);
 var monLayer=L.layerGroup(), sunLayer=L.layerGroup();
+var currentDay='all';
+window.currentDay=currentDay;
 
 function buildCore(stops,color,layer,elId){
   var el=document.getElementById(elId), pts=[];
@@ -67,6 +69,7 @@ var sunPts = sunCorePts
 monLayer.addTo(map); sunLayer.addTo(map);
 
 function setDay(day){
+  currentDay=day; window.currentDay=day;
   document.querySelectorAll('.tab').forEach(function(t){
     var on=t.dataset.d===day;
     t.classList.toggle('on',on);
@@ -80,3 +83,54 @@ function setDay(day){
   if(bounds.length) map.fitBounds(bounds,{padding:[30,30]});
 }
 setDay('all');
+
+/* ---- 모바일: 지도/목록 크게보기 토글 ---- */
+function initViewToggle(){
+  if(!window.matchMedia('(max-width:820px)').matches) return;
+  var wrap=document.createElement('div'); wrap.className='view-toggle';
+  wrap.innerHTML='<button id="btnSplit" class="active">기본</button><button id="btnMapFull">지도 크게</button><button id="btnListFull">목록 크게</button>';
+  document.body.appendChild(wrap);
+  function markActive(id){
+    wrap.querySelectorAll('button').forEach(function(b){b.classList.toggle('active', b.id===id);});
+  }
+  document.getElementById('btnMapFull').onclick=function(){
+    document.body.classList.add('map-full'); document.body.classList.remove('list-full');
+    markActive('btnMapFull');
+    setTimeout(function(){map.invalidateSize();},220);
+  };
+  document.getElementById('btnListFull').onclick=function(){
+    document.body.classList.add('list-full'); document.body.classList.remove('map-full');
+    markActive('btnListFull');
+  };
+  document.getElementById('btnSplit').onclick=function(){
+    document.body.classList.remove('list-full','map-full');
+    markActive('btnSplit');
+    setTimeout(function(){map.invalidateSize();},220);
+  };
+}
+initViewToggle();
+
+/* ---- 월요일(7/20) 실제 당일 기준 현재 위치 하이라이트 ---- */
+function highlightNow(){
+  var rows=document.querySelectorAll('#l-mc .st');
+  if(!rows.length) return;
+  var now=new Date();
+  function p(n){return (n<10?'0':'')+n;}
+  var todayStr = now.getFullYear()+'-'+p(now.getMonth()+1)+'-'+p(now.getDate());
+  if(todayStr!=='2026-07-20'){
+    rows.forEach(function(r){r.classList.remove('now');});
+    return;
+  }
+  var nowMin = now.getHours()*60+now.getMinutes();
+  var best=-1;
+  monCore.forEach(function(s,i){
+    if(!s.t) return;
+    var parts=s.t.split(':'); var m=parseInt(parts[0],10)*60+parseInt(parts[1],10);
+    if(m<=nowMin) best=i;
+  });
+  rows.forEach(function(r,i){ r.classList.toggle('now', i===best); });
+}
+if(document.querySelector('#l-mc')){
+  highlightNow();
+  setInterval(highlightNow, 60000);
+}

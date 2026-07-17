@@ -4,11 +4,10 @@ var monCore=[
  {t:"10:24",n:"London Euston 도착",o:"Sheffield 07:56 출발 기차 도착 — 여기서 쇼핑 데이 시작",a:"London Euston, London NW1 2EF",y:51.5282,x:-0.1337},
  {t:"10:50",n:"코벤트가든 (Neal's Yard)",o:"컬러풀한 포토스팟 겸 쇼핑, Euston에서 가까운 곳부터",a:"Neal's Yard, Covent Garden, London WC2H 9DP",y:51.5142,x:-0.1265},
  {t:"11:30",n:"소호 거리",o:"점심 겸 소호 산책 (Wardour St / Greek St 근처)",a:"Soho, London W1D",y:51.5136,x:-0.1360},
- {t:"12:00",n:"리버티 백화점 4층",o:"Regent Street, Hamleys 바로 근처",a:"Regent Street, London W1B 5AH",y:51.5142,x:-0.1400},
+ {t:"12:00",n:"리버티 백화점 4층",o:"Regent Street, Hamleys 바로 근처 — 백화점은 여기 한 곳만",a:"Regent Street, London W1B 5AH",y:51.5142,x:-0.1400},
  {t:"12:20",n:"Hamleys",o:"장난감가게, Regent Street",a:"188-196 Regent Street, London W1B 5BT",y:51.5136,x:-0.1402},
  {t:"12:40",n:"디즈니 스토어",o:"Oxford St",a:"350-352 Oxford Street, London W1C 1JH",y:51.5154,x:-0.1447},
- {t:"13:15",n:"젤리캣 (Selfridges)",o:"셀프리지스 백화점 내 Jellycat 매장",a:"400 Oxford Street, London W1A 1AB",y:51.5145,x:-0.1530},
- {t:"14:20",n:"노팅힐북샵",o:"영화 노팅힐 실제 서점, 포토벨로 로드 (지하철 이동 포함 여유있게)",a:"13 Blenheim Crescent, London W11 2EE",y:51.5170,x:-0.2055},
+ {t:"13:30",n:"노팅힐북샵",o:"영화 노팅힐 실제 서점, 포토벨로 로드 (지하철 이동 포함 여유있게)",a:"13 Blenheim Crescent, London W11 2EE",y:51.5170,x:-0.2055},
  {t:"16:00",n:"London Euston 복귀",o:"18:46 Sheffield행 기차 전 여유있게 도착, 역 안 식당가 있음",a:"London Euston, London NW1 2EF",y:51.5282,x:-0.1337}
 ];
 
