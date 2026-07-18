@@ -16,6 +16,23 @@ function addArrows(pts,color,layer){
   }
 }
 
+function placeSlug(s){
+  return (s.n+'|'+s.a).toLowerCase()
+    .replace(/[.#$\[\]\/]/g,' ')
+    .replace(/[^a-z0-9가-힣]+/g,'-')
+    .replace(/^-+|-+$/g,'')
+    .slice(0,80) || 'place';
+}
+
+function attachTagBtn(row,s){
+  var pid=placeSlug(s);
+  var btn=document.createElement('button');
+  btn.className='tagbtn'; btn.dataset.pid=pid; btn.dataset.name=s.n;
+  btn.innerHTML='🏷️ <span class="tagcnt">0</span>';
+  btn.onclick=function(e){ e.stopPropagation(); if(window.openPlaceNotes) window.openPlaceNotes(pid, s.n); };
+  row.querySelector('div:last-child').appendChild(btn);
+}
+
 var map=L.map('map',{zoomControl:true}).setView([51.52,-0.16],11);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'OpenStreetMap'}).addTo(map);
 var monLayer=L.layerGroup(), sunLayer=L.layerGroup();
@@ -30,8 +47,9 @@ function buildCore(stops,color,layer,elId){
     m.addTo(layer); pts.push([s.y,s.x]);
     var row=document.createElement('div'); row.className='st';
     row.innerHTML='<div class="bd" style="background:'+color+'">'+num+'</div><div>'+(s.t?'<div class="tm">'+s.t+'</div>':'')+'<b>'+s.n+'</b><div class="nt">'+s.o+'</div><a href="'+gmapLink(s)+'" target="_blank">Google Maps 길찾기</a></div>';
-    row.onclick=function(e){if(e.target.tagName==='A')return; map.setView([s.y,s.x],15); m.openPopup();};
+    row.onclick=function(e){if(e.target.tagName==='A'||e.target.classList.contains('tagbtn'))return; map.setView([s.y,s.x],15); m.openPopup();};
     el.appendChild(row);
+    attachTagBtn(row,s);
   });
   L.polyline(pts,{color:color,weight:3,opacity:.55,dashArray:'6,6'}).addTo(layer);
   addArrows(pts,color,layer);
@@ -49,8 +67,9 @@ function buildCat(cat,layer,elId){
     m.addTo(layer); pts.push([s.y,s.x]);
     var row=document.createElement('div'); row.className='st';
     row.innerHTML='<div class="bd sq" style="background:'+cat.color+'">'+label+'</div><div><b>'+s.n+'</b><div class="nt">'+s.o+'</div><a href="'+gmapLink(s)+'" target="_blank">Google Maps 길찾기</a></div>';
-    row.onclick=function(e){if(e.target.tagName==='A')return; map.setView([s.y,s.x],16); m.openPopup();};
+    row.onclick=function(e){if(e.target.tagName==='A'||e.target.classList.contains('tagbtn'))return; map.setView([s.y,s.x],16); m.openPopup();};
     box.appendChild(row);
+    attachTagBtn(row,s);
   });
   el.appendChild(box);
   return pts;
@@ -84,31 +103,39 @@ function setDay(day){
 }
 setDay('all');
 
-/* ---- 모바일: 지도/목록 크게보기 토글 ---- */
-function initViewToggle(){
+/* ---- 모바일: 지도가 메인, '동선 목록 보기' 버튼을 누르면 현재 동선이 글래스 팝업 카드로 ---- */
+function initMobileRoutePopup(){
   if(!window.matchMedia('(max-width:820px)').matches) return;
-  var wrap=document.createElement('div'); wrap.className='view-toggle';
-  wrap.innerHTML='<button id="btnSplit" class="active">기본</button><button id="btnMapFull">지도 크게</button><button id="btnListFull">목록 크게</button>';
-  document.body.appendChild(wrap);
-  function markActive(id){
-    wrap.querySelectorAll('button').forEach(function(b){b.classList.toggle('active', b.id===id);});
+  var header=document.querySelector('header');
+  var routeBackdrop=document.getElementById('routeBackdrop');
+  var sb=document.getElementById('sb');
+  if(!header||!routeBackdrop||!sb) return;
+
+  var handle=document.createElement('div'); handle.className='sb-handle';
+  handle.innerHTML='<span>📋 현재 동선 목록</span>';
+  var closeBtn=document.createElement('button'); closeBtn.type='button'; closeBtn.setAttribute('aria-label','닫기'); closeBtn.textContent='✕';
+  handle.appendChild(closeBtn);
+  sb.insertBefore(handle, sb.firstChild);
+
+  function setOpen(open){
+    document.body.classList.toggle('route-open', open);
+    if(open){
+      ['notesPanel','notesBackdrop','placePanel','placeBackdrop'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.classList.remove('open');
+      });
+    } else {
+      setTimeout(function(){map.invalidateSize();},220);
+    }
   }
-  document.getElementById('btnMapFull').onclick=function(){
-    document.body.classList.add('map-full'); document.body.classList.remove('list-full');
-    markActive('btnMapFull');
-    setTimeout(function(){map.invalidateSize();},220);
-  };
-  document.getElementById('btnListFull').onclick=function(){
-    document.body.classList.add('list-full'); document.body.classList.remove('map-full');
-    markActive('btnListFull');
-  };
-  document.getElementById('btnSplit').onclick=function(){
-    document.body.classList.remove('list-full','map-full');
-    markActive('btnSplit');
-    setTimeout(function(){map.invalidateSize();},220);
-  };
+  header.addEventListener('click', function(e){
+    if(e.target.closest('.tab')) return;
+    setOpen(!document.body.classList.contains('route-open'));
+  });
+  closeBtn.addEventListener('click', function(e){ e.stopPropagation(); setOpen(false); });
+  routeBackdrop.addEventListener('click', function(){ setOpen(false); });
+  setTimeout(function(){map.invalidateSize();},50);
 }
-initViewToggle();
+initMobileRoutePopup();
 
 /* ---- 월요일(7/20) 실제 당일 기준 현재 위치 하이라이트 ---- */
 function highlightNow(){

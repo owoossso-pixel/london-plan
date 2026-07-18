@@ -119,7 +119,13 @@ function initMobileRoutePopup(){
 
   function setOpen(open){
     document.body.classList.toggle('route-open', open);
-    if(!open) setTimeout(function(){map.invalidateSize();},220);
+    if(open){
+      ['notesPanel','notesBackdrop','placePanel','placeBackdrop'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.classList.remove('open');
+      });
+    } else {
+      setTimeout(function(){map.invalidateSize();},220);
+    }
   }
   header.addEventListener('click', function(e){
     if(e.target.closest('.tab')) return;

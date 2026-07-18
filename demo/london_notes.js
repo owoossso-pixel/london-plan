@@ -37,6 +37,9 @@
   }
 
   function openPanel(){
+    document.body.classList.remove('route-open');
+    var pp=document.getElementById('placePanel'); if(pp) pp.classList.remove('open');
+    var pb=document.getElementById('placeBackdrop'); if(pb) pb.classList.remove('open');
     panel.classList.add('open'); backdrop.classList.add('open');
     localStorage.setItem(SEEN_KEY, String(Date.now()));
     badge.hidden = true;

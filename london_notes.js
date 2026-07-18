@@ -9,6 +9,7 @@
   var sendBtn=document.getElementById('noteSend');
   var nameInput=document.getElementById('noteName');
   var warnEl=document.getElementById('notesWarn');
+  var placeSelect=document.getElementById('notePlaceTag');
   if(!panel||!fab) return;
 
   var NAME_KEY='ldn_name', SEEN_KEY='ldn_lastSeen';
@@ -17,7 +18,28 @@
     localStorage.setItem(NAME_KEY, nameInput.value.trim());
   });
 
+  // 동선 목록에서 장소를 뽑아 태그 선택지로 사용
+  if(placeSelect && typeof placeSlug==='function'){
+    var placeGroups=[
+      {label:'일요일 · 박물관', items:(typeof sunCore!=='undefined'?sunCore:[]).concat(typeof sunCatA!=='undefined'?sunCatA.items:[]).concat(typeof sunCatB!=='undefined'?sunCatB.items:[])},
+      {label:'월요일(20일) · 쇼핑', items:(typeof monCore!=='undefined'?monCore:[]).concat(typeof monCatB!=='undefined'?monCatB.items:[]).concat(typeof monCatD!=='undefined'?monCatD.items:[])}
+    ];
+    placeGroups.forEach(function(g){
+      if(!g.items.length) return;
+      var og=document.createElement('optgroup'); og.label=g.label;
+      g.items.forEach(function(s){
+        var opt=document.createElement('option');
+        opt.value=placeSlug(s); opt.textContent=s.n;
+        og.appendChild(opt);
+      });
+      placeSelect.appendChild(og);
+    });
+  }
+
   function openPanel(){
+    document.body.classList.remove('route-open');
+    var pp=document.getElementById('placePanel'); if(pp) pp.classList.remove('open');
+    var pb=document.getElementById('placeBackdrop'); if(pb) pb.classList.remove('open');
     panel.classList.add('open'); backdrop.classList.add('open');
     localStorage.setItem(SEEN_KEY, String(Date.now()));
     badge.hidden = true;
@@ -36,7 +58,7 @@
     return;
   }
 
-  firebase.initializeApp(firebaseConfig);
+  if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   var notesRef = firebase.database().ref('london-trip-notes');
 
   var dayColors={sun:'#e11d48', mon:'#0284c7', all:'#64748b'};
@@ -66,10 +88,18 @@
     notes.forEach(function(nte){
       var row=document.createElement('div');
       row.className='note-row'+(myName && nte.name===myName ? ' me':'');
-      var tag = nte.day && dayLabels[nte.day] ? '<span class="note-tag" style="background:'+(dayColors[nte.day]||'#64748b')+'">'+dayLabels[nte.day]+'</span>' : '';
+      var dayTag = nte.day && dayLabels[nte.day] ? '<span class="note-tag" style="background:'+(dayColors[nte.day]||'#64748b')+'">'+dayLabels[nte.day]+'</span>' : '';
+      var placeTag = nte.placeName ? '<span class="note-tag place" style="background:#db2777">📍 '+escapeHtml(nte.placeName)+'</span>' : '';
       var bubble=document.createElement('div'); bubble.className='note-bubble';
-      bubble.innerHTML = tag+'<div class="note-meta"><b>'+escapeHtml(nte.name||'익명')+'</b><span>'+(nte.ts?fmtTime(nte.ts):'')+'</span></div><div class="note-text"></div>';
+      bubble.innerHTML = dayTag+placeTag+'<div class="note-meta"><b>'+escapeHtml(nte.name||'익명')+'</b><span>'+(nte.ts?fmtTime(nte.ts):'')+'</span></div><div class="note-text"></div>';
       bubble.querySelector('.note-text').textContent = nte.text||'';
+      if(nte.placePid && window.openPlaceNotes){
+        var placeTagEl=bubble.querySelector('.note-tag.place');
+        if(placeTagEl){
+          placeTagEl.style.cursor='pointer';
+          placeTagEl.onclick=function(){ closePanel(); window.openPlaceNotes(nte.placePid, nte.placeName); };
+        }
+      }
       if(myName && nte.name===myName){
         var del=document.createElement('span'); del.className='note-del'; del.textContent='삭제';
         del.onclick=function(){ if(confirm('메모를 삭제할까요?')) notesRef.child(nte.key).remove(); };
@@ -100,8 +130,11 @@
     }
     localStorage.setItem(NAME_KEY, name);
     var day = (typeof window.currentDay!=='undefined' && window.currentDay) || 'all';
-    notesRef.push({name:name, text:text, day:day, ts: firebase.database.ServerValue.TIMESTAMP});
+    var placePid = placeSelect ? placeSelect.value : '';
+    var placeName = (placeSelect && placePid) ? placeSelect.options[placeSelect.selectedIndex].textContent : null;
+    notesRef.push({name:name, text:text, day:day, placePid: placePid||null, placeName: placeName, ts: firebase.database.ServerValue.TIMESTAMP});
     input.value='';
+    if(placeSelect) placeSelect.value='';
   }
   sendBtn.addEventListener('click', send);
   input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); send(); } });

@@ -1,4 +1,4 @@
-// 장소별 메모/태그 — Firebase Realtime Database 기반 (데모: demo-place-notes 경로 사용)
+// 장소별 메모/태그 — Firebase Realtime Database 기반
 (function(){
   var backdrop=document.getElementById('placeBackdrop');
   var panel=document.getElementById('placePanel');
@@ -105,7 +105,7 @@
   }
 
   if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  var notesRef = firebase.database().ref('demo-place-notes');
+  var notesRef = firebase.database().ref('place-notes');
 
   notesRef.on('value', function(snap){
     var grouped={};
